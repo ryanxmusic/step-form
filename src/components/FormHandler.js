@@ -30,7 +30,7 @@ const FormHandler = () => {
             - firstName, lastName, eMail inputs
             - product select
         #STEP 2
-            - add necessary fields[inputs, checboxes] based on selected product
+            - add necessary fields[inputs, checkboxes] based on selected product
             - all products must have textarea
         #STEP 3
             - review inputted data at previous steps
@@ -44,10 +44,15 @@ const FormHandler = () => {
 
     const [formData, setFormData] = useState({
         stepOne: {
-            firstName: '',
-            lastName: '',
-            email: '',
-            product: ''
+            firstName: { value: '' },
+            lastName: { value: '' },
+            email: { value: '' },
+            product: { value: '' }
+        },
+        stepTwo: {
+            feature1: { value: false },
+            feature2: { value: false },
+            mentions: { value: '' }
         }
     });
 
@@ -60,7 +65,7 @@ const FormHandler = () => {
                 ...prev[step],
                 [e.target.name]: {
                     ...prev[step][e.target.name],
-                    value: e.target.value
+                    value: e.target.value || !!e.target.checked
                 }
             }
         }));
@@ -71,10 +76,14 @@ const FormHandler = () => {
         e.preventDefault();
 
         const data = new FormData();
-        data.append('firstName', formData.stepOne.firstName.value);
-        data.append('lastName', formData.stepOne.lastName.value);
-        data.append('email', formData.stepOne.email.value);
-        data.append('product', formData.stepOne.product.value);
+        data.append('firstName', formData.stepOne.firstName);
+        data.append('lastName', formData.stepOne.lastName);
+        data.append('email', formData.stepOne.email);
+        data.append('product', formData.stepOne.product);
+
+        data.append('feature1', formData.stepTwo.feature1);
+        data.append('feature1', formData.stepTwo.feature2);
+        data.append('feature1', formData.stepTwo.mentions);
     };
 
     return (
@@ -94,6 +103,7 @@ const FormHandler = () => {
                     title="Product requirements"
                     step={2}
                     stepKey="stepTwo"
+                    onChange={changeHandler}
                     onPrevStep={(step) => setStep(step)}
                     onNextStep={onNextStep}
                 />
@@ -113,15 +123,7 @@ const FormHandler = () => {
 
 export default FormHandler;
 
-const Step = ({
-    title,
-    data,
-    onChange,
-    step,
-    stepKey,
-    onPrevStep,
-    onNextStep
-}) => {
+const Step = ({ title, onChange, step, stepKey, onPrevStep, onNextStep }) => {
     return (
         <>
             <h3 className="text-center">
@@ -152,8 +154,6 @@ const Step = ({
                         </div>
                     </div>
 
-                    <div className="my-3" />
-
                     <Input
                         id="email"
                         type="email"
@@ -161,8 +161,6 @@ const Step = ({
                         placeholder="Email"
                         onChange={(e) => onChange(stepKey, e)}
                     />
-
-                    <div className="my-3" />
 
                     <Select
                         name=""
@@ -175,7 +173,92 @@ const Step = ({
             )}
 
             {/* @Step2 */}
-            {step === 2 && <div className="d-flex flex-column my-5"></div>}
+            {step === 2 && (
+                <div className="d-flex flex-column my-5">
+                    <h5>Product name</h5>
+
+                    <Checkbox
+                        id="feature1"
+                        name="feature1"
+                        label="Feature 1"
+                        onChange={(e) => onChange(stepKey, e)}
+                    />
+                    <Checkbox
+                        id="feature2"
+                        name="feature2"
+                        label="Feature 1"
+                        onChange={(e) => onChange(stepKey, e)}
+                    />
+
+                    <Input
+                        id="height"
+                        type="number"
+                        name="height"
+                        placeholder="Height"
+                        onChange={(e) => onChange(stepKey, e)}
+                    />
+
+                    <Input
+                        id="width"
+                        type="number"
+                        name="width"
+                        placeholder="Width"
+                        onChange={(e) => onChange(stepKey, e)}
+                    />
+
+                    <Textarea
+                        id="mentions"
+                        name="mentions"
+                        label="Mentions"
+                        onChange={(e) => onChange(stepKey, e)}
+                    />
+                </div>
+            )}
+
+            {/* @Step3 */}
+            {step === 3 && (
+                <div className="d-flex flex-column my-5">
+                    <ul className="list-group">
+                        <li className="list-group-item">
+                            <h5>Name</h5>
+                            <span>John Doe</span>
+                        </li>
+                        <li className="list-group-item">
+                            <h5>Email</h5>
+                            <span>address@mail.com</span>
+                        </li>
+                        <li className="list-group-item">
+                            <h5>Product:</h5>
+                            <span>Product1</span>
+                        </li>
+                        <li className="list-group-item">
+                            <h5>Feature1:</h5>
+                            <span>Yes/No</span>
+                        </li>
+                        <li className="list-group-item">
+                            <h5>Feature1:</h5>
+                            <span>Yes/No</span>
+                        </li>
+                        <li className="list-group-item">
+                            <h5>Height:</h5>
+                            <span>560cm</span>
+                        </li>
+                        <li className="list-group-item">
+                            <h5>Width:</h5>
+                            <span>140cm</span>
+                        </li>
+                        <li className="list-group-item">
+                            <h5>Mentions:</h5>
+                            <span>
+                                Lorem, ipsum dolor sit amet consectetur
+                                adipisicing elit. Laboriosam dolor ducimus nemo
+                                eveniet laudantium accusantium? Excepturi facere
+                                vel voluptatem nemo.
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            )}
 
             <div className="d-flex flex-row justify-content-center">
                 {step > 1 && (
@@ -208,26 +291,25 @@ const Step = ({
     );
 };
 
-const Input = ({ type, placeholder, name, value, onChange }) => {
+const Input = ({ id, type, placeholder, name, value, onChange }) => {
     return (
-        <div className="my-1">
-            <input
-                className="form-control"
-                type={type}
-                placeholder={placeholder}
-                name={name}
-                value={value}
-                onChange={onChange}
-                autoComplete="off"
-            />
-        </div>
+        <input
+            className="form-control my-2"
+            id={id}
+            type={type}
+            placeholder={placeholder}
+            name={name}
+            value={value}
+            onChange={onChange}
+            autoComplete="off"
+        />
     );
 };
 
 const Select = ({ name, value, onChange }) => {
     return (
         <select
-            className="form-control"
+            className="form-control my-2"
             name={name}
             value={value}
             onChange={onChange}
@@ -238,5 +320,42 @@ const Select = ({ name, value, onChange }) => {
                 </option>
             ))}
         </select>
+    );
+};
+
+const Checkbox = ({ id, name, label, value, onChange }) => {
+    return (
+        <div className="form-check my-2">
+            <input
+                className="form-check-input"
+                id={id}
+                name={name}
+                type="checkbox"
+                value={value}
+                onChange={onChange}
+            />
+            <label className="form-check-label" htmlFor={id}>
+                {label}
+            </label>
+        </div>
+    );
+};
+
+const Textarea = ({ id, name, label, value, onChange }) => {
+    return (
+        <div className="my-2">
+            <label className="form-check-label" htmlFor={id}>
+                {label}
+            </label>
+            <textarea
+                className="form-control"
+                id={id}
+                name={name}
+                type="checkbox"
+                value={value}
+                onChange={onChange}
+                rows="3"
+            />
+        </div>
     );
 };
