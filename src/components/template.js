@@ -103,6 +103,7 @@ const FormHandler = () => {
             }
         }
     });
+    const [step2State, setStep2State] = useState({});
 
     const [errors, setErrors] = useState({});
     const changeHandler = (step, e) => {
@@ -156,6 +157,8 @@ const FormHandler = () => {
                     stepKey="stepOne"
                     data={formData.stepOne}
                     onChange={changeHandler}
+                    step2State={step2State}
+                    setStep2State={setStep2State}
                     onStepChange={stepChangeHandler}
                     errors={errors}
                 />
@@ -167,8 +170,8 @@ const FormHandler = () => {
                         step={2}
                         product={formData.stepOne.product.value}
                         stepKey="stepTwo"
-                        data={formData.stepTwo}
-                        onChange={changeHandler}
+                        step2State={step2State}
+                        setStep2State={setStep2State}
                         onStepChange={stepChangeHandler}
                         onPrevStep={(step) => setStep(step)}
                         errors={errors}
@@ -178,6 +181,7 @@ const FormHandler = () => {
             {step === 3 && (
                 <Preview
                     onPrevStep={() => setStep(step - 1)}
+                    step2State={step2State}
                     data={[
                         {
                             label: 'First Name',
@@ -203,23 +207,23 @@ const FormHandler = () => {
                             value: formData.stepTwo.checkbox2.checked
                                 ? 'Yes'
                                 : 'No'
-                        },
-                        {
-                            label: 'Color',
-                            value: formData.stepTwo.color.value
-                        },
-                        {
-                            label: 'Height',
-                            value: formData.stepTwo.height.value
-                        },
-                        {
-                            label: 'Width',
-                            value: formData.stepTwo.width.value
-                        },
-                        {
-                            label: 'Mentions',
-                            value: formData.stepTwo.mentions.value
                         }
+                        // {
+                        //     label: 'Color',
+                        //     value: formData.stepTwo.color.value
+                        // },
+                        // {
+                        //     label: 'Height',
+                        //     value: formData.stepTwo.height.value
+                        // },
+                        // {
+                        //     label: 'Width',
+                        //     value: formData.stepTwo.width.value
+                        // },
+                        // {
+                        //     label: 'Mentions',
+                        //     value: formData.stepTwo.mentions.value
+                        // }
                     ]}
                 />
             )}
@@ -238,57 +242,64 @@ const Step = ({
     step,
     onPrevStep,
     title,
-    product
+    product,
+    setStep2State,
+    step2State
 }) => {
     let output = [];
-    for (const [key, val] of Object.entries(data)) {
-        if (val.type.split(':')[0] === 'input') {
-            output.push(
-                <Input
-                    key={key}
-                    placeholder={val.placeholder}
-                    name={key}
-                    value={val.value}
-                    onChange={(e) => onChange(stepKey, e)}
-                    error={errors[key]}
-                    type={val.type.split(':')[1]}
-                />
-            );
-        } else if (val.type === 'select') {
-            output.push(
-                <Select
-                    key={key}
-                    name={key}
-                    value={val.value}
-                    onChange={(e) => onChange(stepKey, e)}
-                    error={errors[key]}
-                    choices={val.choices}
-                />
-            );
-        } else if (val.type === 'textarea') {
-            output.push(
-                <Textarea
-                    key={key}
-                    name={key}
-                    id={val.id}
-                    label={val.label}
-                    value={val.value}
-                    onChange={(e) => onChange(stepKey, e)}
-                    error={errors[key]}
-                />
-            );
-        } else if (val.type === 'checkbox') {
-            output.push(
-                <Checkbox
-                    key={key}
-                    name={key}
-                    id={val.id}
-                    label={val.label}
-                    value={val.value}
-                    checked={val.checked}
-                    onChange={(e) => onChange(stepKey, e)}
-                />
-            );
+    if (step !== 2) {
+        for (const [key, val] of Object.entries(data)) {
+            if (val.type.split(':')[0] === 'input') {
+                output.push(
+                    <Input
+                        key={key}
+                        placeholder={val.placeholder}
+                        name={key}
+                        value={val.value}
+                        onChange={(e) => onChange(stepKey, e)}
+                        error={errors[key]}
+                        type={val.type.split(':')[1]}
+                    />
+                );
+            } else if (val.type === 'select') {
+                output.push(
+                    <Select
+                        key={key}
+                        name={key}
+                        value={val.value}
+                        onChange={(e) => {
+                            setStep2State({});
+                            onChange(stepKey, e);
+                        }}
+                        error={errors[key]}
+                        choices={val.choices}
+                    />
+                );
+            } else if (val.type === 'textarea') {
+                output.push(
+                    <Textarea
+                        key={key}
+                        name={key}
+                        id={val.id}
+                        label={val.label}
+                        value={val.value}
+                        onChange={(e) => onChange(stepKey, e)}
+                        error={errors[key]}
+                    />
+                );
+            } else if (val.type === 'checkbox') {
+                output.push(
+                    <Checkbox
+                        key={key}
+                        name={key}
+                        id={val.id}
+                        label={val.label}
+                        value={val.value}
+                        checked={val.checked}
+                        onChange={(e) => onChange(stepKey, e)}
+                    />
+                );
+            }
         }
     }
 
@@ -296,7 +307,15 @@ const Step = ({
         <Fragment>
             <h4 className="text-center mb-5">{title}</h4>
 
-            {step === 2 ? <ProductRequirement product={product} /> : output}
+            {step === 2 ? (
+                <ProductRequirement
+                    step2State={step2State}
+                    setStep2State={setStep2State}
+                    product={product}
+                />
+            ) : (
+                output
+            )}
 
             {step > 1 && (
                 <button
@@ -361,15 +380,33 @@ Input.propTypes = {
     onChange: PropTypes.func.isRequired
 };
 
-const ProductRequirement = ({ product, value, onChange }) => {
+const ProductRequirement = ({
+    product,
+    value,
+    onChange,
+    step2State,
+    setStep2State
+}) => {
     const productRequirement = productRequirements.find(
         (item) => item.name === product
     );
+
+    const handleStep2Change = (e) => {
+        console.log(step2State);
+        setStep2State({ ...step2State, [e.target.name]: e.target.value });
+    };
     return (
         <>
+            <h5>am i idiot?</h5>
             {productRequirement.inputs.map((input) => (
                 <div key={input} className="d-flex flex-column">
-                    <input id={input} name={input} placeholder={input} />
+                    <label htmlFor={input}>{input} </label>
+                    <input
+                        id={input}
+                        value={step2State[input]}
+                        onChange={handleStep2Change}
+                        name={input}
+                    />
                 </div>
             ))}
         </>
@@ -481,7 +518,8 @@ Checkbox.propTypes = {
     onChange: PropTypes.func.isRequired
 };
 
-const Preview = ({ data, onPrevStep }) => {
+const Preview = ({ data, onPrevStep, step2State }) => {
+    const step2Keys = Object.keys(step2State);
     return (
         <div className="panel is-primary">
             <h4 className="text-center mb-5">Review</h4>
@@ -490,6 +528,14 @@ const Preview = ({ data, onPrevStep }) => {
                     <li key={index} className="list-group-item">
                         <Fragment>
                             <strong>{input.label}:</strong> <br /> {input.value}
+                        </Fragment>
+                    </li>
+                ))}
+
+                {step2Keys.map((key) => (
+                    <li key={key} className="list-group-item">
+                        <Fragment>
+                            <strong>{key}:</strong> <br /> {step2State[key]}
                         </Fragment>
                     </li>
                 ))}
