@@ -1,9 +1,9 @@
-import FormHandler from './components/FormHandler.js'
+import QuoteForm from './components'
 import './App.css';
 
 function App() {
   return (
-    <FormHandler/>
+    <QuoteForm />
   );
 }
 
